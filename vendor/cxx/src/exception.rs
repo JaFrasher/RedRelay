@@ -3,8 +3,10 @@
 use alloc::boxed::Box;
 use core::fmt::{self, Display};
 
+use core::error::Error as StdError;
+
 /// Exception thrown from an `extern "C++"` function.
-#[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[derive(Debug)]
 pub struct Exception {
     pub(crate) what: Box<str>,
@@ -16,9 +18,7 @@ impl Display for Exception {
     }
 }
 
-#[cfg(feature = "std")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "std")))]
-impl std::error::Error for Exception {}
+impl StdError for Exception {}
 
 impl Exception {
     #[allow(missing_docs)]

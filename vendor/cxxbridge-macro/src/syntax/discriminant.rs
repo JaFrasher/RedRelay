@@ -178,29 +178,6 @@ impl Discriminant {
             magnitude: i.wrapping_abs() as u64,
         }
     }
-
-    #[cfg(feature = "experimental-enum-variants-from-header")]
-    pub(crate) const fn checked_succ(self) -> Option<Self> {
-        match self.sign {
-            Sign::Negative => {
-                if self.magnitude == 1 {
-                    Some(Discriminant::zero())
-                } else {
-                    Some(Discriminant {
-                        sign: Sign::Negative,
-                        magnitude: self.magnitude - 1,
-                    })
-                }
-            }
-            Sign::Positive => match self.magnitude.checked_add(1) {
-                Some(magnitude) => Some(Discriminant {
-                    sign: Sign::Positive,
-                    magnitude,
-                }),
-                None => None,
-            },
-        }
-    }
 }
 
 impl Display for Discriminant {
@@ -274,14 +251,14 @@ fn parse_int_suffix(suffix: &str) -> Result<Option<Atom>> {
 }
 
 #[derive(Copy, Clone)]
-struct Limits {
-    repr: Atom,
-    min: Discriminant,
-    max: Discriminant,
+pub(crate) struct Limits {
+    pub repr: Atom,
+    pub min: Discriminant,
+    pub max: Discriminant,
 }
 
 impl Limits {
-    fn of(repr: Atom) -> Option<Limits> {
+    pub(crate) fn of(repr: Atom) -> Option<Limits> {
         for limits in &LIMITS {
             if limits.repr == repr {
                 return Some(*limits);
@@ -295,41 +272,41 @@ const LIMITS: [Limits; 8] = [
     Limits {
         repr: U8,
         min: Discriminant::zero(),
-        max: Discriminant::pos(std::u8::MAX as u64),
+        max: Discriminant::pos(u8::MAX as u64),
     },
     Limits {
         repr: I8,
-        min: Discriminant::neg(std::i8::MIN as i64),
-        max: Discriminant::pos(std::i8::MAX as u64),
+        min: Discriminant::neg(i8::MIN as i64),
+        max: Discriminant::pos(i8::MAX as u64),
     },
     Limits {
         repr: U16,
         min: Discriminant::zero(),
-        max: Discriminant::pos(std::u16::MAX as u64),
+        max: Discriminant::pos(u16::MAX as u64),
     },
     Limits {
         repr: I16,
-        min: Discriminant::neg(std::i16::MIN as i64),
-        max: Discriminant::pos(std::i16::MAX as u64),
+        min: Discriminant::neg(i16::MIN as i64),
+        max: Discriminant::pos(i16::MAX as u64),
     },
     Limits {
         repr: U32,
         min: Discriminant::zero(),
-        max: Discriminant::pos(std::u32::MAX as u64),
+        max: Discriminant::pos(u32::MAX as u64),
     },
     Limits {
         repr: I32,
-        min: Discriminant::neg(std::i32::MIN as i64),
-        max: Discriminant::pos(std::i32::MAX as u64),
+        min: Discriminant::neg(i32::MIN as i64),
+        max: Discriminant::pos(i32::MAX as u64),
     },
     Limits {
         repr: U64,
         min: Discriminant::zero(),
-        max: Discriminant::pos(std::u64::MAX),
+        max: Discriminant::pos(u64::MAX),
     },
     Limits {
         repr: I64,
-        min: Discriminant::neg(std::i64::MIN),
-        max: Discriminant::pos(std::i64::MAX as u64),
+        min: Discriminant::neg(i64::MIN),
+        max: Discriminant::pos(i64::MAX as u64),
     },
 ];

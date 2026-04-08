@@ -34,6 +34,7 @@
 //! ## Safe Initialization of Global Data
 //!
 //! ```rust
+//! # #[cfg(any(feature = "std", feature = "critical-section"))] {
 //! use std::{env, io};
 //!
 //! use once_cell::sync::OnceCell;
@@ -60,6 +61,7 @@
 //!     INSTANCE.set(logger).unwrap();
 //!     // use `Logger::global()` from now on
 //! }
+//! # }
 //! ```
 //!
 //! ## Lazy Initialized Global Data
@@ -67,6 +69,7 @@
 //! This is essentially the `lazy_static!` macro, but without a macro.
 //!
 //! ```rust
+//! # #[cfg(any(feature = "std", feature = "critical-section"))] {
 //! use std::{sync::Mutex, collections::HashMap};
 //!
 //! use once_cell::sync::OnceCell;
@@ -80,12 +83,14 @@
 //!         Mutex::new(m)
 //!     })
 //! }
+//! # }
 //! ```
 //!
 //! There are also the [`sync::Lazy`] and [`unsync::Lazy`] convenience types to
 //! streamline this pattern:
 //!
 //! ```rust
+//! # #[cfg(any(feature = "std", feature = "critical-section"))] {
 //! use std::{sync::Mutex, collections::HashMap};
 //! use once_cell::sync::Lazy;
 //!
@@ -99,6 +104,7 @@
 //! fn main() {
 //!     println!("{:?}", GLOBAL_DATA.lock().unwrap());
 //! }
+//! # }
 //! ```
 //!
 //! Note that the variable that holds `Lazy` is declared as `static`, *not*
@@ -171,6 +177,7 @@
 //! runtime:
 //!
 //! ```
+//! # #[cfg(any(feature = "std", feature = "critical-section"))] {
 //! use std::path::Path;
 //!
 //! use once_cell::sync::OnceCell;
@@ -203,6 +210,7 @@
 //!     // ...
 //! # drop(rgb);
 //! }
+//! # }
 //! ```
 //!
 //! ## `lateinit`
@@ -212,6 +220,7 @@
 //!
 //!
 //! ```
+//! # #[cfg(any(feature = "std", feature = "critical-section"))] {
 //! use once_cell::sync::OnceCell;
 //!
 //! pub struct LateInit<T> { cell: OnceCell<T> }
@@ -252,6 +261,7 @@
 //!
 //!     let _a = &a.b.a.b.a;
 //! }
+//! # }
 //! ```
 //!
 //! # Comparison with std
@@ -275,13 +285,11 @@
 //!
 //! # Minimum Supported `rustc` Version
 //!
-//! This crate's minimum supported `rustc` version is `1.56.0`.
-//!
-//! If only the `std` feature is enabled, MSRV will be updated conservatively,
-//! supporting at least latest 8 versions of the compiler. When using other
-//! features, like `parking_lot`, MSRV might be updated more frequently, up to
-//! the latest stable. In both cases, increasing MSRV is *not* considered a
-//! semver-breaking change.
+//! If only the `std`, `alloc`, or `race` features are enabled, MSRV will be
+//! updated conservatively, supporting at least latest 8 versions of the compiler.
+//! When using other features, like `parking_lot`, MSRV might be updated more
+//! frequently, up to the latest stable. In both cases, increasing MSRV is *not*
+//! considered a semver-breaking change and requires only a minor version bump.
 //!
 //! # Implementation details
 //!
@@ -1069,7 +1077,7 @@ pub mod sync {
         /// # Example
         ///
         /// ```
-        /// use once_cell::unsync::OnceCell;
+        /// use once_cell::sync::OnceCell;
         ///
         /// let cell = OnceCell::new();
         /// assert!(cell.get().is_none());

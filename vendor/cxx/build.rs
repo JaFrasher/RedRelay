@@ -1,3 +1,5 @@
+#![expect(unexpected_cfgs)]
+
 use std::env;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -10,7 +12,7 @@ fn main() {
         .file(manifest_dir.join("src/cxx.cc"))
         .cpp(true)
         .cpp_link_stdlib(None) // linked via link-cplusplus crate
-        .flag_if_supported(cxxbridge_flags::STD)
+        .std(cxxbridge_flags::STD)
         .warnings_into_errors(cfg!(deny_warnings))
         .compile("cxxbridge1");
 
@@ -23,14 +25,30 @@ fn main() {
         println!("cargo:HEADER={}", cxx_h.to_string_lossy());
     }
 
+    println!("cargo:rustc-check-cfg=cfg(built_with_cargo)");
+    println!("cargo:rustc-check-cfg=cfg(compile_error_if_alloc)");
+    println!("cargo:rustc-check-cfg=cfg(compile_error_if_std)");
+    println!("cargo:rustc-check-cfg=cfg(cxx_experimental_no_alloc)");
+    println!("cargo:rustc-check-cfg=cfg(skip_ui_tests)");
+
     if let Some(rustc) = rustc_version() {
-        if rustc.minor < 60 {
-            println!("cargo:warning=The cxx crate requires a rustc version 1.60.0 or newer.");
+        if rustc.minor < 82 {
+            println!("cargo:warning=The cxx crate requires a rustc version 1.82.0 or newer.");
             println!(
                 "cargo:warning=You appear to be building with: {}",
                 rustc.version,
             );
         }
+    }
+
+    if let (Some(manifest_links), Some(pkg_version_major)) = (
+        env::var_os("CARGO_MANIFEST_LINKS"),
+        env::var_os("CARGO_PKG_VERSION_MAJOR"),
+    ) {
+        assert_eq!(
+            manifest_links,
+            *format!("cxxbridge{}", pkg_version_major.to_str().unwrap()),
+        );
     }
 }
 

@@ -50,6 +50,14 @@ mod ordered {
             self.iter()
         }
     }
+
+    impl<'a, T> IntoIterator for OrderedSet<&'a T> {
+        type Item = &'a T;
+        type IntoIter = <Vec<&'a T> as IntoIterator>::IntoIter;
+        fn into_iter(self) -> Self::IntoIter {
+            self.vec.into_iter()
+        }
+    }
 }
 
 mod unordered {
@@ -93,6 +101,13 @@ mod unordered {
         pub(crate) fn retain(&mut self, f: impl FnMut(&T) -> bool) {
             self.0.retain(f);
         }
+
+        #[cfg_attr(not(proc_macro), expect(dead_code))]
+        pub(crate) fn extend(&mut self, iter: impl IntoIterator<Item = T>) {
+            for value in iter {
+                self.insert(value);
+            }
+        }
     }
 }
 
@@ -110,7 +125,7 @@ impl<'s, 'a, T> Iterator for Iter<'s, 'a, T> {
     }
 }
 
-impl<'a, T> Debug for OrderedSet<&'a T>
+impl<T> Debug for OrderedSet<&T>
 where
     T: Debug,
 {

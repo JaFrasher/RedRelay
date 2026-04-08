@@ -1,11 +1,12 @@
 use crate::gen::{CfgEvaluator, CfgResult};
-use once_cell::sync::OnceCell;
 use std::borrow::Borrow;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap as Map, BTreeSet as Set};
 use std::env;
+use std::ptr;
+use std::sync::OnceLock;
 
-static ENV: OnceCell<CargoEnv> = OnceCell::new();
+static ENV: OnceLock<CargoEnv> = OnceLock::new();
 
 struct CargoEnv {
     features: Set<Name>,
@@ -51,13 +52,11 @@ impl CargoEnv {
         let mut features = Set::new();
         let mut cfgs = Map::new();
         for (k, v) in env::vars_os() {
-            let k = match k.to_str() {
-                Some(k) => k,
-                None => continue,
+            let Some(k) = k.to_str() else {
+                continue;
             };
-            let v = match v.into_string() {
-                Ok(v) => v,
-                Err(_) => continue,
+            let Ok(v) = v.into_string() else {
+                continue;
             };
             if let Some(feature_name) = k.strip_prefix(CARGO_FEATURE_PREFIX) {
                 let feature_name = Name(feature_name.to_owned());
@@ -98,7 +97,7 @@ struct Lookup(str);
 
 impl Lookup {
     fn new(name: &str) -> &Self {
-        unsafe { &*(name as *const str as *const Self) }
+        unsafe { &*(ptr::from_ref::<str>(name) as *const Self) }
     }
 }
 

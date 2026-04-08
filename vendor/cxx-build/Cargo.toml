@@ -11,14 +11,21 @@
 
 [package]
 edition = "2021"
-rust-version = "1.60"
+rust-version = "1.82"
 name = "cxx-build"
-version = "1.0.108"
+version = "1.0.194"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
+build = false
 exclude = ["build.rs"]
+autolib = false
+autobins = false
+autoexamples = false
+autotests = false
+autobenches = false
 description = "C++ code generator for integrating `cxx` crate into a Cargo build."
 homepage = "https://cxx.rs"
 documentation = "https://docs.rs/cxx-build"
+readme = false
 keywords = [
     "ffi",
     "build-dependencies",
@@ -31,35 +38,45 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/dtolnay/cxx"
 
 [package.metadata.docs.rs]
-rustdoc-args = ["--generate-link-to-definition"]
 targets = ["x86_64-unknown-linux-gnu"]
+rustdoc-args = [
+    "--generate-link-to-definition",
+    "--generate-macro-expansion",
+    "--extern-html-root-url=core=https://doc.rust-lang.org",
+    "--extern-html-root-url=alloc=https://doc.rust-lang.org",
+    "--extern-html-root-url=std=https://doc.rust-lang.org",
+]
+
+[features]
+parallel = ["cc/parallel"]
 
 [lib]
-doc-scrape-examples = false
+name = "cxx_build"
+path = "src/lib.rs"
 
 [dependencies.cc]
-version = "1.0.79"
+version = "1.0.101"
 
 [dependencies.codespan-reporting]
-version = "0.11.1"
+version = "0.13.1"
 
-[dependencies.once_cell]
-version = "1.18"
+[dependencies.indexmap]
+version = "2.9.0"
 
 [dependencies.proc-macro2]
-version = "1.0.63"
+version = "1.0.74"
 features = ["span-locations"]
 default-features = false
 
 [dependencies.quote]
-version = "1.0.29"
+version = "1.0.35"
 default-features = false
 
 [dependencies.scratch]
 version = "1.0.5"
 
 [dependencies.syn]
-version = "2.0.23"
+version = "2.0.46"
 features = [
     "clone-impls",
     "full",
@@ -76,7 +93,3 @@ version = "0.7"
 
 [dev-dependencies.pkg-config]
 version = "0.3.27"
-
-[features]
-experimental-async-fn = []
-parallel = ["cc/parallel"]

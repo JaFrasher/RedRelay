@@ -1,5 +1,5 @@
 use self::kind::{Kind, Opaque, Trivial};
-use crate::CxxString;
+use crate::string::CxxString;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
 
@@ -191,7 +191,6 @@ macro_rules! impl_extern_type {
         $($(
             $(#[$($attr)*])*
             unsafe impl ExternType for $ty {
-                #[allow(unused_attributes)] // incorrect lint; this doc(hidden) attr *is* respected by rustdoc
                 #[doc(hidden)]
                 type Id = crate::type_id!($cxxpath);
                 type Kind = $kind;
@@ -217,7 +216,7 @@ impl_extern_type! {
     f64 = "double"
 
     #[cfg(feature = "alloc")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     String = "rust::String"
 
     [Opaque]
