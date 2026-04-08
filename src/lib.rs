@@ -1,14 +1,11 @@
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::{Mutex, OnceLock};
 use red4ext_rs::prelude::*;
 
-static RESPONSES: Mutex<Option<HashMap<String, String>>> = Mutex::new(None);
+static RESPONSES: OnceLock<Mutex<HashMap<String, String>>> = OnceLock::new();
 
-fn init_storage() {
-    let mut guard = RESPONSES.lock().unwrap();
-    if guard.is_none() {
-        *guard = Some(HashMap::new());
-    }
+fn get_map() -> &'static Mutex<HashMap<String, String>> {
+    RESPONSES.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
 define_plugin! {
@@ -24,58 +21,42 @@ define_plugin! {
 }
 
 fn schedule_request(request_id: String, method: String, url: String, body: String) {
-    init_storage();
-    {
-        let mut guard = RESPONSES.lock().unwrap();
-        let map = guard.as_mut().unwrap();
-        map.insert(request_id.clone(), String::from("PENDING"));
-    }
+    get_map().lock().unwrap().insert(request_id.clone(), String::from("PENDING"));
     std::thread::spawn(move || {
         let result = match method.to_uppercase().as_str() {
             "GET" => ureq::get(&url).call(),
-            _ => ureq::post(&url)
-                .set("Content-Type", "application/json")
-                .send_string(&body),
+            _     => ureq::post(&url)
+                         .set("Content-Type", "application/json")
+                         .send_string(&body),
         };
         let response = match result {
             Ok(resp) => match resp.into_string() {
                 Ok(text) => text,
-                Err(e) => format!("ERROR:{}", e),
+                Err(e)   => format!("ERROR:{}", e),
             },
             Err(e) => format!("ERROR:{}", e),
         };
-        let mut guard = RESPONSES.lock().unwrap();
-        let map = guard.as_mut().unwrap();
-        map.insert(request_id, response);
+        get_map().lock().unwrap().insert(request_id, response);
     });
 }
 
 fn get_response(request_id: String) -> String {
-    init_storage();
-    let guard = RESPONSES.lock().unwrap();
-    let map = guard.as_ref().unwrap();
-    match map.get(&request_id) {
+    match get_map().lock().unwrap().get(&request_id) {
         Some(v) if v == "PENDING" => String::from("PENDING"),
-        Some(v) => v.clone(),
-        None => String::from("NOT_FOUND"),
+        Some(v)                   => v.clone(),
+        None                      => String::from("NOT_FOUND"),
     }
 }
 
 fn get_status(request_id: String) -> String {
-    init_storage();
-    let guard = RESPONSES.lock().unwrap();
-    let map = guard.as_ref().unwrap();
-    match map.get(&request_id) {
-        Some(v) if v == "PENDING" => String::from("PENDING"),
-        Some(v) if v.starts_with("ERROR:") => String::from("ERROR"),
-        Some(_) => String::from("COMPLETE"),
-        None => String::from("NOT_FOUND"),
+    match get_map().lock().unwrap().get(&request_id) {
+        Some(v) if v == "PENDING"           => String::from("PENDING"),
+        Some(v) if v.starts_with("ERROR:")  => String::from("ERROR"),
+        Some(_)                             => String::from("COMPLETE"),
+        None                                => String::from("NOT_FOUND"),
     }
 }
 
 fn cancel_request(request_id: String) {
-    init_storage();
-    let mut guard = RESPONSES.lock().unwrap();
-    let map = guard.as_mut().unwrap();
-    map.remove(&request_id);
+    get_map().lock().unwrap().remove(&request_id);
 }
