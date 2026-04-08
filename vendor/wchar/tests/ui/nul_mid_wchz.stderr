@@ -1,0 +1,5 @@
+error: C-style string cannot contain nul characters
+ --> $DIR/nul_mid_wchz.rs:3:35
+  |
+3 | const NUL_MID: &[wchar_t] = wchz!("nul byte\0 mid");
+  |                                   ^^^^^^^^^^^^^^^^
