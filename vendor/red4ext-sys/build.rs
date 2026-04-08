@@ -6,10 +6,17 @@ fn main() {
         PathBuf::from("cpp").join("glue"),
     ];
 
-    cxx_build::bridge("src/lib.rs")
-        .includes(includes)
-        .flag("-std=c++20")
-        .compile("red4ext-rs");
+    let mut build = cxx_build::bridge("src/lib.rs");
+    build.includes(includes);
+
+    // MSVC uses /std:c++20, GCC/Clang uses -std=c++20
+    if std::env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default() == "msvc" {
+        build.flag("/std:c++20");
+    } else {
+        build.flag("-std=c++20");
+    }
+
+    build.compile("red4ext-rs");
 
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=cpp/glue/glue.hpp");
