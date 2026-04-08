@@ -83,7 +83,7 @@ void DefinePlugin(
     aInfo->name = (wchar_t*)name;
     aInfo->author = (wchar_t*)author;
     aInfo->version = RED4EXT_SEMVER(major, minor, patch);
-    aInfo->runtime = RED4EXT_RUNTIME_INDEPENDENT;
+    aInfo->runtime = RED4EXT_RUNTIME_LATEST;
     aInfo->sdk = RED4EXT_SDK_LATEST;
 }
 
