@@ -1,5 +1,5 @@
 [package]
-name = "red4ext-rs-example"
+name = "redrelay"
 version = "0.1.0"
 rust-version = "1.70"
 edition = "2021"
@@ -10,6 +10,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 red4ext-rs = { git = "https://github.com/jac3km4/red4ext-rs.git", tag = "v0.5.0" }
+ureq = { version = "2", features = ["json"] }
 
 [profile.release]
 lto = "thin"
