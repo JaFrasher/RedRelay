@@ -1,7 +1,7 @@
 [source.crates-io]
 replace-with = "vendored-sources"
 
-[source."git+https://github.com/jac3km4/red4ext-rs.git?tag=v0.5.0"]
+[source."git+https://github.com/jac3km4/red4ext-rs.git?tag=v0.5.0#efab7f21ddd903dab0daf976a3a7bd559d82108d"]
 replace-with = "vendored-sources"
 
 [source.vendored-sources]
