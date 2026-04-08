@@ -84,7 +84,7 @@ void DefinePlugin(
     aInfo->author = (wchar_t*)author;
     aInfo->version = RED4EXT_SEMVER(major, minor, patch);
     aInfo->runtime = RED4EXT_RUNTIME_INDEPENDENT;
-    aInfo->sdk = RED4EXT_SDK_LATEST;
+    aInfo->sdk = RED4EXT_V0_SEMVER(0, 5, 0);
 }
 
 uint32_t GetSdkVersion()
